@@ -284,7 +284,8 @@ static void main_loop(ALLEGRO_DISPLAY * display, ALLEGRO_EVENT_QUEUE *queue, ALL
                 doMouse();
                 doRepeatActions();
             }
-            redraw = false;
+            // If mouse or repeat actions wanted a reload, allow that soon
+            redraw = stonesenseState.timeToReloadSegment;
         }
         /* Take the next event out of the event queue, and store it in `event'. */
         bool in_time = 0;
@@ -472,6 +473,7 @@ static void* stonesense_thread(ALLEGRO_THREAD* main_thread, void* parms)
     al_register_event_source(queue, al_get_timer_event_source(stonesenseState.animationtimer));
 
     ssConfig.readCond = al_create_cond();
+    ssConfig.readMutex = al_create_mutex();
 
 #ifdef BENCHMARK
     benchmark();

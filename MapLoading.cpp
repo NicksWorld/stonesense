@@ -33,6 +33,7 @@
 #include "df/plant_tree_tile.h"
 
 #include "allegro5/color.h"
+#include "allegro5/threads.h"
 
 bool connected = 0;
 bool threadrunnng = 0;
@@ -991,7 +992,11 @@ static void * threadedSegment(ALLEGRO_THREAD *read_thread, void *arg)
         stonesenseState.map_segment.lockRead();
         read_segment(arg);
         stonesenseState.map_segment.unlockRead();
-        al_rest(stonesenseState.ssConfig.config.automatic_reload_time/1000.0);
+        
+        // Wait to be signaled it is time to reload
+        al_lock_mutex(stonesenseState.ssConfig.readMutex);
+        al_wait_cond(stonesenseState.ssConfig.readCond, stonesenseState.ssConfig.readMutex);
+        al_unlock_mutex(stonesenseState.ssConfig.readMutex);
     }
     return 0;
 }
@@ -1016,4 +1021,8 @@ void reloadPosition()
     } else {
         read_segment(NULL);
     }
+    // Notify the reader thread it is time to update
+    al_lock_mutex(stonesenseState.ssConfig.readMutex);
+    al_broadcast_cond(stonesenseState.ssConfig.readCond);
+    al_unlock_mutex(stonesenseState.ssConfig.readMutex);
 }

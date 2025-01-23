@@ -52,6 +52,7 @@ struct GameConfiguration {
 
     //following are threading stuff
     ALLEGRO_COND* readCond;
+    ALLEGRO_MUTEX* readMutex;
     ALLEGRO_THREAD* readThread;
     bool threadmade = false;
     bool threadstarted;

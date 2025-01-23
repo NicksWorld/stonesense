@@ -331,6 +331,8 @@ void action_resetscreen(uint32_t keymod)
         ssState.Position.x = (ssState.RegionDim.x -ssState.Size.x)/2;
         ssState.Position.y = (ssState.RegionDim.y -ssState.Size.y)/2;
     }
+    stonesenseState.timeToReloadSegment = true;
+
 }
 
 void action_decrsegmentX(uint32_t keymod)
@@ -460,6 +462,8 @@ void action_incrzoom(uint32_t keymod)
     auto& ssConfig = stonesenseState.ssConfig;
     ssConfig.zoom++;
     ssConfig.scale = std::pow(SCALEZOOMFACTOR, ssConfig.zoom);
+    stonesenseState.timeToReloadSegment = true;
+
 }
 
 void action_decrzoom(uint32_t keymod)
@@ -467,6 +471,8 @@ void action_decrzoom(uint32_t keymod)
     auto& ssConfig = stonesenseState.ssConfig;
     ssConfig.zoom--;
     ssConfig.scale = std::pow(SCALEZOOMFACTOR, ssConfig.zoom);
+    stonesenseState.timeToReloadSegment = true;
+
 }
 
 void action_screenshot(uint32_t keymod)
