@@ -268,6 +268,15 @@ void WorldSegment::DrawAllTiles()
             },
             [&](draw_event_sprite d) {
                 auto& sprite = d.sprite;
+                int32_t x = d.world_x;
+                int32_t y = d.world_y;
+                int32_t z = d.world_z;
+
+                this->CorrectTileForSegmentOffset(x, y, z);
+                this->CorrectTileForSegmentRotation(x, y, z);
+                pointToScreen(&x, &y, z);
+                x -= (TILEWIDTH>>1)*stonesenseState.ssConfig.scale;
+
                 al_draw_tinted_scaled_bitmap(
                         sprite.bitmap,
                         sprite.tint,
@@ -275,10 +284,10 @@ void WorldSegment::DrawAllTiles()
                         sprite.sy,
                         sprite.width,
                         sprite.height,
-                        sprite.dx - extrude,
-                        sprite.dy - extrude,
-                        sprite.dw + (extrude*2),
-                        sprite.dh + (extrude*2),
+                        x + (sprite.dx*ssConfig.scale) - extrude,
+                        y + (sprite.dy*ssConfig.scale) - extrude,
+                        sprite.dw * ssConfig.scale + (extrude*2),
+                        sprite.dh * ssConfig.scale + (extrude*2),
                         0
                 );
             },

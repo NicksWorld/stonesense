@@ -307,9 +307,9 @@ void AssembleCreature(int drawx, int drawy, Stonesense_Unit* creature, Tile * b)
             SPRITEWIDTH,
             SPRITEHEIGHT,
             drawx,
-            drawy - (WALLHEIGHT)*ssConfig.scale,
-            SPRITEWIDTH*ssConfig.scale,
-            SPRITEHEIGHT*ssConfig.scale,
+            drawy - (WALLHEIGHT),
+            SPRITEWIDTH,
+            SPRITEHEIGHT,
             0);
     }
 }

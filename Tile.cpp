@@ -177,21 +177,18 @@ inline ALLEGRO_BITMAP* imageSheet(t_subSprite sprite, ALLEGRO_BITMAP* defaultBmp
 
 void Tile::AssembleParticleCloud(int count, float centerX, float centerY, float rangeX, float rangeY, ALLEGRO_BITMAP *sprite, ALLEGRO_COLOR tint)
 {
-    auto& ssConfig = stonesenseState.ssConfig;
-
+    // TODO: Figure out what the hell is going on here
     for(int i = 0; i < count; i++) {
         int width = al_get_bitmap_width(sprite);
         int height = al_get_bitmap_height(sprite);
-        float drawx = centerX + ((((float)rand() / RAND_MAX) - 0.5) * rangeX * ssConfig.scale);
-        float drawy = centerY + ((((float)rand() / RAND_MAX) - 0.5) * rangeY * ssConfig.scale);
-        AssembleSprite(sprite, tint, 0, 0, width, height, drawx, drawy,width*ssConfig.scale, height*ssConfig.scale, 0);
+        float drawx = centerX + ((((float)rand() / RAND_MAX) - 0.5) * rangeX);
+        float drawy = centerY + ((((float)rand() / RAND_MAX) - 0.5) * rangeY);
+        AssembleSprite(sprite, tint, 0, 0, width, height, drawx, drawy,width, height, 0);
     }
 }
 
 void Tile::AssembleSpriteFromSheet( int spriteNum, ALLEGRO_BITMAP* spriteSheet, ALLEGRO_COLOR color, float x, float y, Tile * b, float in_scale)
 {
-    auto& ssConfig = stonesenseState.ssConfig;
-
     int sheetx = spriteNum % SHEET_OBJECTSWIDE;
     int sheety = spriteNum / SHEET_OBJECTSWIDE;
     AssembleSprite(
@@ -202,9 +199,9 @@ void Tile::AssembleSpriteFromSheet( int spriteNum, ALLEGRO_BITMAP* spriteSheet, 
         SPRITEWIDTH * in_scale,
         SPRITEHEIGHT * in_scale,
         x,
-        y - (WALLHEIGHT)*ssConfig.scale,
-        SPRITEWIDTH*ssConfig.scale,
-        SPRITEHEIGHT*ssConfig.scale,
+        y - WALLHEIGHT,
+        SPRITEWIDTH,
+        SPRITEHEIGHT,
         0);
 }
 
@@ -222,7 +219,7 @@ void Tile::AssembleSprite(ALLEGRO_BITMAP *bitmap, ALLEGRO_COLOR tint, float sx, 
     sprite.dw = dw;
     sprite.dh = dh;
 
-    draw_event_sprite d = { sprite };
+    draw_event_sprite d = { sprite, x, y, z };
     ownerSegment->AssembleSprite(d);
 }
 
@@ -339,16 +336,8 @@ void Tile::AssembleTile( void )
 
     int32_t drawx = 0;
     int32_t drawy = 0;
-    GetDrawLocation(drawx, drawy);
 
     auto& ssConfig = stonesenseState.ssConfig;
-    auto& ssState = stonesenseState.ssState;
-
-    //TODO the following check should get incorporated into segment beautification
-    if(((drawx + TILEWIDTH*ssConfig.scale) < 0) || (drawx > ssState.ScreenW) || ((drawy + (TILETOPHEIGHT + FLOORHEIGHT)*ssConfig.scale) < 0) || (drawy - WALLHEIGHT*ssConfig.scale > ssState.ScreenH)) {
-        visible = false;
-        return;
-    }
 
     bool chopThisTile = 0;
 
@@ -363,7 +352,7 @@ void Tile::AssembleTile( void )
     }
 
     if(building.type == BUILDINGTYPE_BLACKBOX) {
-        AssembleSpriteFromSheet( SPRITEOBJECT_BLACK, stonesenseState.IMGObjectSheet, al_map_rgb(255,255,255), drawx, drawy+FLOORHEIGHT*ssConfig.scale);
+        AssembleSpriteFromSheet( SPRITEOBJECT_BLACK, stonesenseState.IMGObjectSheet, al_map_rgb(255,255,255), drawx, drawy+FLOORHEIGHT);
         AssembleSpriteFromSheet( SPRITEOBJECT_BLACK, stonesenseState.IMGObjectSheet, al_map_rgb(255,255,255), drawx, drawy);
         return;
     }
@@ -489,13 +478,13 @@ void Tile::AssembleTile( void )
             contentLoader->itemConfigs[Item.item.type]->configured) {
             contentLoader->itemConfigs[Item.item.type]->default_sprite.assemble_world(x, y, z, this);
         } else {
-            AssembleSpriteFromSheet( 350, stonesenseState.IMGObjectSheet, lookupMaterialColor(Item.matt, Item.dyematt), drawx, (tileShapeBasic()==tiletype_shape_basic::Ramp)?(drawy - ((WALLHEIGHT/2)*ssConfig.scale)):drawy , this);
+            AssembleSpriteFromSheet( 350, stonesenseState.IMGObjectSheet, lookupMaterialColor(Item.matt, Item.dyematt), drawx, (tileShapeBasic()==tiletype_shape_basic::Ramp)?(drawy - (WALLHEIGHT/2)):drawy , this);
         }
     }
 
     //shadow
     if (shadow > 0) {
-        AssembleSpriteFromSheet( BASE_SHADOW_PLATE + shadow - 1, stonesenseState.IMGObjectSheet, al_map_rgb(255,255,255), drawx, (tileShapeBasic()==tiletype_shape_basic::Ramp)?(drawy - ((WALLHEIGHT/2)*ssConfig.scale)):drawy , this);
+        AssembleSpriteFromSheet( BASE_SHADOW_PLATE + shadow - 1, stonesenseState.IMGObjectSheet, al_map_rgb(255,255,255), drawx, (tileShapeBasic()==tiletype_shape_basic::Ramp)?(drawy - (WALLHEIGHT/2)):drawy , this);
     }
 
     //Building
@@ -681,7 +670,7 @@ void Tile::AssembleTile( void )
         case df::flow_type::SeaFoam:
             tint.a*=tileeffect.density/100.0f;
             AssembleSprite(sprite_oceanwave, tint, 0, 0, al_get_bitmap_width(sprite_oceanwave), al_get_bitmap_height(sprite_oceanwave),
-                drawx, drawy - (WALLHEIGHT)*ssConfig.scale, SPRITEWIDTH*ssConfig.scale, SPRITEHEIGHT*ssConfig.scale, 0);
+                drawx, drawy - (WALLHEIGHT), SPRITEWIDTH, SPRITEHEIGHT, 0);
             break;
         case df::flow_type::OceanWave:
             AssembleParticleCloud(tileeffect.density, drawx, drawy - (SPRITEHEIGHT/2), SPRITEWIDTH, SPRITEHEIGHT, sprite_water, tint);
@@ -824,7 +813,6 @@ int Tile::GetBloodSpriteOffset() {
 
 void Tile::AssembleFloorBlood ( int32_t drawx, int32_t drawy )
 {
-    auto& ssConfig = stonesenseState.ssConfig;
     t_SpriteWithOffset sprite;
 
     if( designation.bits.flow_size < 1 && (bloodlevel)) {
@@ -844,8 +832,8 @@ void Tile::AssembleFloorBlood ( int32_t drawx, int32_t drawy )
             TILETOPHEIGHT+FLOORHEIGHT,
             drawx,
             drawy,
-            TILEWIDTH*ssConfig.scale,
-            (TILETOPHEIGHT+FLOORHEIGHT)*ssConfig.scale,
+            TILEWIDTH,
+            (TILETOPHEIGHT+FLOORHEIGHT),
             0);
         AssembleSprite(
             stonesenseState.IMGBloodSheet,
@@ -856,8 +844,8 @@ void Tile::AssembleFloorBlood ( int32_t drawx, int32_t drawy )
             TILETOPHEIGHT+FLOORHEIGHT,
             drawx,
             drawy,
-            TILEWIDTH*ssConfig.scale,
-            (TILETOPHEIGHT+FLOORHEIGHT)*ssConfig.scale,
+            TILEWIDTH,
+            (TILETOPHEIGHT+FLOORHEIGHT),
             0);
     }
 }

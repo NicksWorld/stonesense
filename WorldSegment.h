@@ -14,6 +14,7 @@ struct Stonesense_Unit;
 struct draw_event_fog {};
 struct draw_event_sprite {
     Sprite sprite;
+    uint32_t world_x, world_y, world_z;
 };
 struct draw_event_creaturetext {
     Stonesense_Unit* unit;
