@@ -315,7 +315,7 @@ void AssembleCreature(int drawx, int drawy, Stonesense_Unit* creature, Tile * b)
 }
 
 void AssembleCreatureText(int drawx, int drawy, Stonesense_Unit* creature, WorldSegment * seg){
-    draw_event d = {CreatureText, creature, al_map_rgb(255,255,255), 0, 0, 0, 0, (float)drawx, (float)drawy, 0, 0, 0};
+    draw_event_creaturetext d { creature, (float)drawx, (float)drawy };
     seg->AssembleSprite(d);
 }
 

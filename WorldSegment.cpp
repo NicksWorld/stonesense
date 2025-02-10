@@ -1,3 +1,5 @@
+#include "SpriteColors.h"
+#include "allegro5/bitmap_draw.h"
 #include "common.h"
 #include "WorldSegment.h"
 #include "GUI.h"
@@ -233,6 +235,9 @@ Tile* WorldSegment::getTile(uint32_t index)
     return tiles[index].IsValid() ? &(tiles[index]) : NULL;
 }
 
+template<class... Ts>
+struct overloads : Ts... { using Ts::operator()...; };
+
 void WorldSegment::DrawAllTiles()
 {
     if(!loaded) {
@@ -240,6 +245,7 @@ void WorldSegment::DrawAllTiles()
     }
 
     auto& ssConfig = stonesenseState.ssConfig;
+    auto& ssState = stonesenseState.ssState;
 
     if (ssConfig.config.show_osd) {
         DrawCurrentLevelOutline(true);
@@ -249,46 +255,36 @@ void WorldSegment::DrawAllTiles()
         al_hold_bitmap_drawing(true);
 
         int extrude = ssConfig.config.extrude_tiles;
-        auto DrawBitmap = [&](ALLEGRO_BITMAP* b, draw_event& todraw) {
-            al_draw_tinted_scaled_bitmap(
-                b,
-                todraw.tint,
-                todraw.sx,
-                todraw.sy,
-                todraw.sw,
-                todraw.sh,
-                todraw.dx - extrude,
-                todraw.dy - extrude,
-                todraw.dw + (extrude*2),
-                todraw.dh + (extrude*2),
-                todraw.flags);
-            };
+        const auto draw_visitor = overloads {
+            [&]([[maybe_unused]] draw_event_fog d) {
+                al_draw_filled_rectangle(0, 0, ssState.ScreenW, ssState.ScreenH, premultiply(ssConfig.config.fogcol));
+            },
+            [&](draw_event_creaturetext d) {
+                DrawCreatureText(d.x, d.y, d.unit);
+            },
+            [&](draw_event_sprite d) {
+                al_draw_tinted_scaled_bitmap(
+                        d.bitmap,
+                        d.tint,
+                        d.sx,
+                        d.sy,
+                        d.sw,
+                        d.sh,
+                        d.dx - extrude,
+                        d.dy - extrude,
+                        d.dw + (extrude*2),
+                        d.dh + (extrude*2),
+                        d.flags
+                    );
+            }
+        };
 
         for(size_t i=0; i<todraw.size(); i++) {
             if(i%ssConfig.config.bitmapHolds==0) {
                 al_hold_bitmap_drawing(false);
                 al_hold_bitmap_drawing(true);
             }
-            switch(todraw[i].type) {
-            case Fog:
-                al_draw_filled_rectangle(
-                        todraw[i].dx,
-                        todraw[i].dy,
-                        todraw[i].dx + todraw[i].dw,
-                        todraw[i].dy + todraw[i].dh,
-                        premultiply(ssConfig.config.fogcol)
-                    );
-                break;
-            case TintedScaledBitmap:
-                DrawBitmap(std::get<ALLEGRO_BITMAP*>(todraw[i].drawobject), todraw[i]);
-                break;
-            case CreatureText:
-                DrawCreatureText(
-                    todraw[i].dx,
-                    todraw[i].dy,
-                    std::get<Stonesense_Unit*>(todraw[i].drawobject));
-                break;
-            }
+            std::visit(draw_visitor, todraw[i]);
         }
     }
 
@@ -312,8 +308,6 @@ void WorldSegment::AssembleAllTiles()
 
     clock_t starttime = clock();
 
-    auto& ssState = stonesenseState.ssState;
-
     // x,y,z print prices
     int32_t vsxmax = segState.Size.x-1;
     int32_t vsymax = segState.Size.y-1;
@@ -321,19 +315,7 @@ void WorldSegment::AssembleAllTiles()
     for(int32_t vsz=0; vsz < vszmax; vsz++) {
         //add the fog to the queue
         if(stonesenseState.ssConfig.config.fogenable) {
-            draw_event d = {
-                Fog,
-                std::monostate{},
-                al_map_rgb(255,255,255),
-                0,
-                0,
-                (float)ssState.ScreenW,
-                (float)ssState.ScreenH,
-                0,
-                0,
-                (float)ssState.ScreenW,
-                (float)ssState.ScreenH,
-                0};
+            draw_event_fog d {};
             AssembleSprite(d);
         }
         //add the tiles to the queue
