@@ -277,6 +277,17 @@ void WorldSegment::DrawAllTiles()
                 pointToScreen(&x, &y, z);
                 x -= (TILEWIDTH>>1)*stonesenseState.ssConfig.scale;
 
+                float draw_x = x + (sprite.dx*ssConfig.scale);
+                float draw_y = y + (sprite.dy*ssConfig.scale);
+                float draw_w = sprite.dw * ssConfig.scale;
+                float draw_h = sprite.dh * ssConfig.scale;
+
+                // Cull off-screen sprites
+                if ((draw_x > ssState.ScreenW) || (draw_y > ssState.ScreenH)
+                        || (draw_x + draw_w < 0) || (draw_y + draw_h) < 0) {
+                    return;
+                }
+
                 al_draw_tinted_scaled_bitmap(
                         sprite.bitmap,
                         sprite.tint,
@@ -284,10 +295,10 @@ void WorldSegment::DrawAllTiles()
                         sprite.sy,
                         sprite.width,
                         sprite.height,
-                        x + (sprite.dx*ssConfig.scale) - extrude,
-                        y + (sprite.dy*ssConfig.scale) - extrude,
-                        sprite.dw * ssConfig.scale + (extrude*2),
-                        sprite.dh * ssConfig.scale + (extrude*2),
+                        draw_x - extrude,
+                        draw_y - extrude,
+                        draw_w + (extrude*2),
+                        draw_h + (extrude*2),
                         0
                 );
             },
