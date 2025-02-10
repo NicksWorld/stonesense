@@ -314,8 +314,8 @@ void AssembleCreature(int drawx, int drawy, Stonesense_Unit* creature, Tile * b)
     }
 }
 
-void AssembleCreatureText(int drawx, int drawy, Stonesense_Unit* creature, WorldSegment * seg){
-    draw_event_creaturetext d = {creature, (float)drawx, (float)drawy};
+void AssembleCreatureText(uint32_t world_x, uint32_t world_y, uint32_t world_z, Stonesense_Unit* creature, WorldSegment * seg){
+    draw_event_creaturetext d = {creature, world_x, world_y, world_z};
     seg->AssembleSprite(d);
 }
 

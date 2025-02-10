@@ -684,7 +684,7 @@ void Tile::AssembleTile( void )
 
     // Creature Names / Info
     if(occ.bits.unit && creature && (ssConfig.show_hidden_tiles || !designation.bits.hidden)) {
-        AssembleCreatureText(drawx, drawy, creature, ownerSegment);
+        AssembleCreatureText(x, y, z, creature, ownerSegment);
     }
 }
 

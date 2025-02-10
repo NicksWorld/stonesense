@@ -18,8 +18,7 @@ struct draw_event_sprite {
 };
 struct draw_event_creaturetext {
     Stonesense_Unit* unit;
-    float dx;
-    float dy;
+    uint32_t world_x, world_y, world_z;
 };
 
 using draw_event = std::variant<draw_event_fog, draw_event_sprite, draw_event_creaturetext>;

@@ -256,6 +256,14 @@ void WorldSegment::DrawAllTiles()
         al_hold_bitmap_drawing(true);
 
         int extrude = ssConfig.config.extrude_tiles;
+
+        auto world_to_screen = [&](int32_t& x, int32_t& y, int32_t& z) {
+            this->CorrectTileForSegmentOffset(x, y, z);
+            this->CorrectTileForSegmentRotation(x, y, z);
+            pointToScreen(&x, &y, z);
+            x -= (TILEWIDTH>>1)*stonesenseState.ssConfig.scale;
+        };
+
         const auto draw_visitor = overloads {
             []([[maybe_unused]] draw_event_fog d) {
                 al_draw_filled_rectangle(
@@ -272,10 +280,7 @@ void WorldSegment::DrawAllTiles()
                 int32_t y = d.world_y;
                 int32_t z = d.world_z;
 
-                this->CorrectTileForSegmentOffset(x, y, z);
-                this->CorrectTileForSegmentRotation(x, y, z);
-                pointToScreen(&x, &y, z);
-                x -= (TILEWIDTH>>1)*stonesenseState.ssConfig.scale;
+                world_to_screen(x, y, z);
 
                 float draw_x = x + (sprite.dx*ssConfig.scale);
                 float draw_y = y + (sprite.dy*ssConfig.scale);
@@ -302,10 +307,15 @@ void WorldSegment::DrawAllTiles()
                         0
                 );
             },
-            [](draw_event_creaturetext d) {
+            [&](draw_event_creaturetext d) {
+                int32_t x = d.world_x;
+                int32_t y = d.world_y;
+                int32_t z = d.world_z;
+                world_to_screen(x, y, z);
+
                 DrawCreatureText(
-                        d.dx,
-                        d.dy,
+                        x,
+                        y,
                         d.unit
                 );
             }
