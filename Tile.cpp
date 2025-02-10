@@ -210,7 +210,19 @@ void Tile::AssembleSpriteFromSheet( int spriteNum, ALLEGRO_BITMAP* spriteSheet, 
 
 void Tile::AssembleSprite(ALLEGRO_BITMAP *bitmap, ALLEGRO_COLOR tint, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh, int flags)
 {
-    draw_event d = {TintedScaledBitmap, bitmap, tint, sx, sy, sw, sh, dx, dy, dw, dh, flags};
+    Sprite sprite {};
+    sprite.bitmap = bitmap;
+    sprite.tint = tint;
+    sprite.sx = sx;
+    sprite.sy = sy;
+    sprite.width = sw;
+    sprite.height = sh;
+    sprite.dx = dx;
+    sprite.dy = dy;
+    sprite.dw = dw;
+    sprite.dh = dh;
+
+    draw_event_sprite d = { sprite };
     ownerSegment->AssembleSprite(d);
 }
 

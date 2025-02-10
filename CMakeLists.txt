@@ -31,6 +31,9 @@ SET(PROJECT_SRCS
     SpriteColors.cpp
     SpriteMaps.cpp
     SpriteObjects.cpp
+    sprite/Sprite.cpp
+    sprite/TileSprite.cpp
+    sprite/CreatureSprite.cpp
     TreeGrowthConfiguration.cpp
     UserInput.cpp
     WorldSegment.cpp

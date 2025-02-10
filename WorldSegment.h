@@ -7,28 +7,21 @@
 #include "Tile.h"
 #include "GameState.h"
 
-enum draw_event_type{
-    Fog,
-    TintedScaledBitmap,
-    CreatureText
-};
+#include "sprite/Sprite.h"
 
 struct Stonesense_Unit;
 
-struct draw_event{
-    draw_event_type type;
-    std::variant<std::monostate,ALLEGRO_BITMAP*,Stonesense_Unit*> drawobject;
-    ALLEGRO_COLOR tint;
-    float sx;
-    float sy;
-    float sw;
-    float sh;
+struct draw_event_fog {};
+struct draw_event_sprite {
+    Sprite sprite;
+};
+struct draw_event_creaturetext {
+    Stonesense_Unit* unit;
     float dx;
     float dy;
-    float dw;
-    float dh;
-    int flags;
 };
+
+using draw_event = std::variant<draw_event_fog, draw_event_sprite, draw_event_creaturetext>;
 
 class WorldSegment
 {
