@@ -233,6 +233,18 @@ Tile* WorldSegment::getTile(uint32_t index)
     return tiles[index].IsValid() ? &(tiles[index]) : NULL;
 }
 
+std::tuple<float, float> WorldSegment::getDrawLocation(int32_t x, int32_t y, int32_t z) {
+    int32_t drawx = x;
+    int32_t drawy = y;
+    int32_t drawz = z;
+
+    this->CorrectTileForSegmentOffset(drawx, drawy, drawz);
+    this->CorrectTileForSegmentRotation(drawx, drawy, drawz);
+    pointToScreen((int*)&drawx, (int*)&drawy, drawz);
+    
+    return {drawx, drawy};
+}
+
 template<class... Ts>
 struct overloads : Ts... { using Ts::operator()...; };
 
@@ -258,19 +270,21 @@ void WorldSegment::DrawAllTiles()
                 al_draw_filled_rectangle(0, 0, ssState.ScreenW, ssState.ScreenH, premultiply(ssConfig.config.fogcol));
             },
             [&](draw_event_creaturetext d) {
-                DrawCreatureText(d.x, d.y, d.unit);
+                std::tuple<float, float> drawpos = this->getDrawLocation(d.world_x, d.world_y, d.world_z);
+                DrawCreatureText(std::get<0>(drawpos), std::get<1>(drawpos), d.unit);
             },
             [&](draw_event_bitmap d) {
+                std::tuple<float, float> drawpos = this->getDrawLocation(d.world_x, d.world_y, d.world_z);
                 al_draw_tinted_scaled_bitmap(d.bitmap,
                         d.tint,
                         d.sx,
                         d.sy,
                         d.sw,
                         d.sh,
-                        d.dx - extrude,
-                        d.dy - extrude,
-                        d.dw + (extrude*2),
-                        d.dh + (extrude*2),
+                        std::get<0>(drawpos) + (d.dx*ssConfig.scale) - extrude,
+                        std::get<1>(drawpos) + (d.dy*ssConfig.scale) - extrude,
+                        (d.dw*ssConfig.scale) + (extrude*2),
+                        (d.dh*ssConfig.scale) + (extrude*2),
                         d.flags
                     );
             }

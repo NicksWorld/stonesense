@@ -1,6 +1,7 @@
 #pragma once
 
 #include <variant>
+#include <tuple>
 
 #include "common.h"
 
@@ -11,11 +12,12 @@ struct draw_event_fog {};
 
 struct Stonesense_Unit;
 struct draw_event_creaturetext {
+    int32_t world_x, world_y, world_z;
     Stonesense_Unit* unit;
-    float x, y;
 };
 
 struct draw_event_bitmap {
+    int32_t world_x, world_y, world_z;
     ALLEGRO_BITMAP* bitmap;
     ALLEGRO_COLOR tint;
     float sx;
@@ -92,6 +94,9 @@ public:
     Tile* getTileRelativeTo(int32_t x, int32_t y, int32_t z,  dirRelative direction);
     Tile* getTileRelativeTo(int32_t x, int32_t y, int32_t z,  dirRelative direction, int distance);
     Tile* getTile(uint32_t index);
+
+    std::tuple<float, float> getDrawLocation(int32_t x, int32_t y, int32_t z);
+
     bool ConvertToSegmentLocal(int32_t & x, int32_t & y, int32_t & z);
     uint32_t ConvertLocalToIndex(int32_t x, int32_t y, int32_t z);
     void CorrectTileForSegmentOffset(int32_t& x, int32_t& y, int32_t& z);

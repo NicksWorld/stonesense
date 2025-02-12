@@ -993,21 +993,8 @@ void c_sprite::assemble_world_offset(int x, int y, int z, int plateoffset, Tile 
 
         auto& ssConfig = stonesenseState.ssConfig;
 
-        int32_t drawx = x;
-        int32_t drawy = y;
-        int32_t drawz = z; //- ownerSegment->sizez + 1;
-
-        b->ownerSegment->CorrectTileForSegmentOffset( drawx, drawy, drawz );
-        b->ownerSegment->CorrectTileForSegmentRotation( drawx, drawy, drawz );
-        pointToScreen((int*)&drawx, (int*)&drawy, drawz);
-        drawx -= (TILEWIDTH>>1)*ssConfig.scale;
-
-        if((drawx + (spritewidth+offset_x)*ssConfig.scale < 0)
-            || (drawx + offset_x*ssConfig.scale > ssState.ScreenW)
-            || (drawy + (spriteheight + offset_y)*ssConfig.scale < 0)
-            || (drawy + (offset_y - WALLHEIGHT)*ssConfig.scale > ssState.ScreenH)) {
-            return;
-        }
+        int32_t drawx = 0;
+        int32_t drawy = 0;
 
         int sheetx, sheety;
         if(platelayout == RAMPBOTTOMPLATE) {
@@ -1040,10 +1027,10 @@ void c_sprite::assemble_world_offset(int x, int y, int z, int plateoffset, Tile 
                     (sheety+WALL_CUTOFF_HEIGHT) * spritescale,
                     spritewidth * spritescale,
                     (spriteheight-WALL_CUTOFF_HEIGHT) * spritescale,
-                    drawx + (offset_x + offset_user_x)*ssConfig.scale,
-                    drawy + (offset_user_y + (offset_y - WALLHEIGHT)+WALL_CUTOFF_HEIGHT)*ssConfig.scale,
-                    spritewidth*ssConfig.scale,
-                    (spriteheight-WALL_CUTOFF_HEIGHT)*ssConfig.scale,
+                    drawx + (offset_x + offset_user_x),
+                    drawy + (offset_user_y + (offset_y - WALLHEIGHT)+WALL_CUTOFF_HEIGHT),
+                    spritewidth,
+                    (spriteheight-WALL_CUTOFF_HEIGHT),
                     0);
 
                 b->AssembleSprite(
@@ -1054,8 +1041,8 @@ void c_sprite::assemble_world_offset(int x, int y, int z, int plateoffset, Tile 
                     SPRITEWIDTH,
                     SPRITEWIDTH,
                     drawx+offset_x,
-                    (drawy+offset_y-(((SPRITEHEIGHT-WALL_CUTOFF_HEIGHT)/2)*ssConfig.scale)),
-                    SPRITEWIDTH*ssConfig.scale, SPRITEWIDTH*ssConfig.scale,
+                    (drawy+offset_y-(((SPRITEHEIGHT-WALL_CUTOFF_HEIGHT)/2))),
+                    SPRITEWIDTH, SPRITEWIDTH,
                     0);
             }
         } else if ((chop && (halftile == HALFPLATEYES)) || (!chop && (halftile == HALFPLATENO)) || (!chop && (halftile == HALFPLATECHOP)) || (halftile == HALFPLATEBOTH)) {
@@ -1068,10 +1055,10 @@ void c_sprite::assemble_world_offset(int x, int y, int z, int plateoffset, Tile 
                         sheety * spritescale,
                         spritewidth * spritescale,
                         spriteheight * spritescale,
-                        drawx + (offset_x + offset_user_x)*ssConfig.scale,
-                        drawy + (offset_user_y + (offset_y - WALLHEIGHT))*ssConfig.scale,
-                        spritewidth*ssConfig.scale,
-                        spriteheight*ssConfig.scale,
+                        drawx + (offset_x + offset_user_x),
+                        drawy + (offset_user_y + (offset_y - WALLHEIGHT)),
+                        spritewidth,
+                        spriteheight,
                         0);
                 }
             }
@@ -1086,10 +1073,10 @@ void c_sprite::assemble_world_offset(int x, int y, int z, int plateoffset, Tile 
                         sheety * SPRITEHEIGHT,
                         SPRITEWIDTH,
                         SPRITEHEIGHT,
-                        drawx + (offset_x)*ssConfig.scale,
-                        drawy + (offset_y)*ssConfig.scale - (WALLHEIGHT)*ssConfig.scale,
-                        SPRITEWIDTH * ssConfig.scale,
-                        SPRITEHEIGHT * ssConfig.scale,
+                        drawx + (offset_x),
+                        drawy + (offset_y)- (WALLHEIGHT),
+                        SPRITEWIDTH,
+                        SPRITEHEIGHT,
                         0);
                     };
                 //Northern border

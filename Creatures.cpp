@@ -307,15 +307,15 @@ void AssembleCreature(int drawx, int drawy, Stonesense_Unit* creature, Tile * b)
             SPRITEWIDTH,
             SPRITEHEIGHT,
             drawx,
-            drawy - (WALLHEIGHT)*ssConfig.scale,
-            SPRITEWIDTH*ssConfig.scale,
-            SPRITEHEIGHT*ssConfig.scale,
+            drawy - (WALLHEIGHT),
+            SPRITEWIDTH,
+            SPRITEHEIGHT,
             0);
     }
 }
 
-void AssembleCreatureText(int drawx, int drawy, Stonesense_Unit* creature, WorldSegment * seg){
-    draw_event_creaturetext d = {creature, (float)drawx, (float)drawy};
+void AssembleCreatureText(int world_x, int world_y, int world_z, Stonesense_Unit* creature, WorldSegment * seg){
+    draw_event_creaturetext d = {world_x, world_y, world_z, creature};
     seg->AssembleSprite(d);
 }
 
