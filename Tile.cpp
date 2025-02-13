@@ -212,9 +212,9 @@ void Tile::AssembleSprite(ALLEGRO_BITMAP *bitmap, ALLEGRO_COLOR tint, float sx, 
 
 void Tile::GetDrawLocation(int32_t& drawx, int32_t& drawy)
 {
-    std::tuple<float, float> drawpos = ownerSegment->getDrawLocation(x, y, z);
-    drawx = std::get<0>(drawpos);
-    drawy = std::get<1>(drawpos);
+    Crd2D drawpos = ownerSegment->getDrawLocation(x, y, z);
+    drawx = drawpos.x;
+    drawy = drawpos.y;
 }
 
 void Tile::DrawGrowth(c_sprite * spriteobject, bool top=true)
